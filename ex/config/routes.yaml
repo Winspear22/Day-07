@@ -7,3 +7,7 @@ controllers:
 Ex01Bundle:
     resource: '../src/Ex01Bundle/Controller'
     type: attribute
+
+Ex02Bundle:
+    resource: '../src/Ex02Bundle/Controller'
+    type: attribute

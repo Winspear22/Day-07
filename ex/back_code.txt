@@ -52,8 +52,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class Ex01Controller extends AbstractController
 {
 
-    #[Route(path:"/ex01", name:"ex01_index")]
-    public function index(): Response
+    #[Route(path:"/ex01", name:"ex01_action")]
+    public function ex01Action(): Response
     {
             $number = $this->getParameter('d07.number');
             return new Response('Le nombre est : ' . $number);
@@ -94,9 +94,72 @@ class D07Extension extends Extension
 namespace App\Ex01Bundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use App\Ex01Bundle\DependencyInjection\D07Extension;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 
 class Ex01Bundle extends Bundle
 {
+	public function getContainerExtension(): ?ExtensionInterface
+	{
+		if (null === $this->extension)
+			$this->extension = new D07Extension();
+		return $this->extension;
+	}
+}
+?>
+
+
+────────────────────────────────────────────
+📂 src/Ex02Bundle/Controller
+└── 📄 Ex02Controller.php
+────────────────────────────────────────────
+<?php
+
+namespace App\Ex02Bundle\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+class Ex02Controller extends AbstractController
+{
+
+    
+
+    #[Route(path: '/{_locale}/ex02/{count}', name: 'ex02', requirements: ['_locale' => 'en|fr', 'count' => '\d'], defaults: ['count' => 0])]
+    public function translationsAction($_locale, $count=0): Response
+    {
+        $number = $this->getParameter('d07.number');
+
+        return $this->render('ex02.html.twig', [
+            'number' => $number,
+            'count' => $count,
+        ]);
+    }
+}
+
+
+
+────────────────────────────────────────────
+📂 src/Ex02Bundle
+└── 📄 Ex02Bundle.php
+────────────────────────────────────────────
+<?php
+
+namespace App\Ex02Bundle;
+
+use Symfony\Component\HttpKernel\Bundle\Bundle;
+use App\Ex01Bundle\DependencyInjection\D07Extension;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+
+class Ex02Bundle extends Bundle
+{
+	public function getContainerExtension(): ?ExtensionInterface
+	{
+		if (null === $this->extension)
+			$this->extension = new D07Extension();
+		return $this->extension;
+	}
 }
 
 
@@ -186,6 +249,10 @@ Ex01Bundle:
     resource: '../src/Ex01Bundle/Controller'
     type: attribute
 
+Ex02Bundle:
+    resource: '../src/Ex02Bundle/Controller'
+    type: attribute
+
 
 
 ────────────────────────────────────────────
@@ -194,6 +261,10 @@ Ex01Bundle:
 ────────────────────────────────────────────
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
+    default_locale: en
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks: ['en']
     annotations: false
     secret: '%env(APP_SECRET)%'
 
