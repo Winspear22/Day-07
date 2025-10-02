@@ -1,0 +1,221 @@
+
+────────────────────────────────────────────
+📂 src/Controller
+└── 📄 .gitignore
+────────────────────────────────────────────
+
+
+
+────────────────────────────────────────────
+📂 src/DataFixtures
+└── 📄 AppFixtures.php
+────────────────────────────────────────────
+<?php
+
+namespace App\DataFixtures;
+
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+
+class AppFixtures extends Fixture
+{
+    public function load(ObjectManager $manager): void
+    {
+        // $product = new Product();
+        // $manager->persist($product);
+
+        $manager->flush();
+    }
+}
+
+
+
+────────────────────────────────────────────
+📂 src/Entity
+└── 📄 .gitignore
+────────────────────────────────────────────
+
+
+
+────────────────────────────────────────────
+📂 src/Ex01Bundle/Controller
+└── 📄 Ex01Controller.php
+────────────────────────────────────────────
+<?php
+
+namespace App\Ex01Bundle\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+class Ex01Controller extends AbstractController
+{
+
+    #[Route(path:"/ex01", name:"ex01_index")]
+    public function index(): Response
+    {
+            $number = $this->getParameter('d07.number');
+            return new Response('Le nombre est : ' . $number);
+    }
+}
+
+
+
+────────────────────────────────────────────
+📂 src/Ex01Bundle/DependencyInjection
+└── 📄 D07Extension.php
+────────────────────────────────────────────
+<?php
+
+namespace App\Ex01Bundle\DependencyInjection;
+
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\Extension;
+
+class D07Extension extends Extension
+{
+    public function load(array $configs, ContainerBuilder $container)
+    {
+        $config = $configs[0];
+        $container->setParameter('d07.number', $config['number']);
+        $container->setParameter('d07.enable', $config['enable'] ?? true);
+    }
+}
+?>
+
+
+────────────────────────────────────────────
+📂 src/Ex01Bundle
+└── 📄 Ex01Bundle.php
+────────────────────────────────────────────
+<?php
+
+namespace App\Ex01Bundle;
+
+use Symfony\Component\HttpKernel\Bundle\Bundle;
+
+class Ex01Bundle extends Bundle
+{
+}
+
+
+
+────────────────────────────────────────────
+📂 src
+└── 📄 Kernel.php
+────────────────────────────────────────────
+<?php
+
+namespace App;
+
+use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+
+class Kernel extends BaseKernel
+{
+    use MicroKernelTrait;
+}
+
+
+
+────────────────────────────────────────────
+📂 src/Repository
+└── 📄 .gitignore
+────────────────────────────────────────────
+
+
+
+────────────────────────────────────────────
+📂 config/packages
+└── 📄 security.yaml
+────────────────────────────────────────────
+security:
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    providers:
+        users_in_memory: { memory: null }
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            lazy: true
+            provider: users_in_memory
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#the-firewall
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
+
+when@test:
+    security:
+        password_hashers:
+            # By default, password hashers are resource intensive and take time. This is
+            # important to generate secure password hashes. In tests however, secure hashes
+            # are not important, waste resources and increase test times. The following
+            # reduces the work factor to the lowest possible values.
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon
+
+
+
+────────────────────────────────────────────
+📂 config
+└── 📄 routes.yaml
+────────────────────────────────────────────
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+Ex01Bundle:
+    resource: '../src/Ex01Bundle/Controller'
+    type: attribute
+
+
+
+────────────────────────────────────────────
+📂 config/packages
+└── 📄 framework.yaml
+────────────────────────────────────────────
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    annotations: false
+    secret: '%env(APP_SECRET)%'
+
+    # Note that the session will be started ONLY if you read or write from it.
+    session: true
+
+    #esi: true
+    #fragments: true
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file
+
+
+
+────────────────────────────────────────────
+📂 config/packages
+└── 📄 app.yaml
+────────────────────────────────────────────
+d07:
+  number: 42
+  enable: true
+
