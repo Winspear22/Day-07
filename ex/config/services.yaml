@@ -6,6 +6,12 @@
 parameters:
 
 services:
+    App\Service\Ex03Service: ~
+
+    App\D07Bundle\Twig\Ex03Extension:
+        arguments:
+            - '@App\Service\Ex03Service'
+        tags: ['twig.extension']
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
