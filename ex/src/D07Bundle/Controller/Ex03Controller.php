@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Ex01Bundle\Controller;
+namespace App\D07Bundle\Controller;
+
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,7 @@ class Ex03Controller extends AbstractController
 
         return $this->render('ex03/ex03.html.twig', [
             'text' => $text,
-            'example' => "42 is the answer in 2025!",
+            'example' => "42 voici le résultat de l exercice 03!",
         ]);
     }
 }

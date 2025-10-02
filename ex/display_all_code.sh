@@ -40,6 +40,7 @@ append_file "config/packages/security.yaml" "$BACK_OUT"
 append_file "config/routes.yaml" "$BACK_OUT"
 append_file "config/packages/framework.yaml" "$BACK_OUT"
 append_file "config/packages/app.yaml" "$BACK_OUT"
+append_file "config/services.yaml" "$BACK_OUT"
 
 echo "✅ $BACK_OUT généré."
 

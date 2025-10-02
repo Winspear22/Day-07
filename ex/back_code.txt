@@ -7,6 +7,101 @@
 
 
 ────────────────────────────────────────────
+📂 src/D07Bundle/Controller
+└── 📄 Ex03Controller.php
+────────────────────────────────────────────
+<?php
+
+namespace App\Ex01Bundle\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+class Ex03Controller extends AbstractController
+{
+
+    #[Route(path:"/ex03", name:"ex03_action")]
+    public function extensionAction(): Response
+    {
+        $text = $this->getParameter('d07.number') . ' voici le résultat de l exercice 03!';
+
+        return $this->render('ex03/ex03.html.twig', [
+            'text' => $text,
+            'example' => "42 is the answer in 2025!",
+        ]);
+    }
+}
+
+
+
+────────────────────────────────────────────
+📂 src/D07Bundle
+└── 📄 D07Bundle.php
+────────────────────────────────────────────
+<?php
+
+namespace App\D07Bundle;
+
+use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use App\Ex01Bundle\DependencyInjection\D07Extension;
+
+class D07Bundle extends Bundle
+{
+	public function getContainerExtension(): ?ExtensionInterface
+	{
+		if (null === $this->extension)
+			$this->extension = new D07Extension();
+		return $this->extension;
+	}
+}
+
+
+
+────────────────────────────────────────────
+📂 src/D07Bundle/Twig
+└── 📄 Ex03Extension.php
+────────────────────────────────────────────
+<?php
+
+namespace App\D07Bundle\Twig;
+
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
+use App\Service\Ex03Service;
+
+class Ex03Extension extends AbstractExtension
+{
+    private Ex03Service $service;
+
+    // Le service s'injecte via le constructeur
+    public function __construct(Ex03Service $service)
+    {
+        $this->service = $service;
+    }
+
+    public function getFilters(): array
+    {
+        // Déclare le filtre Twig
+        return [
+            new TwigFilter('uppercaseWords', [$this->service, 'uppercaseWords']),
+        ];
+    }
+
+    public function getFunctions(): array
+    {
+        // Déclare la fonction Twig
+        return [
+            new TwigFunction('countNumbers', [$this->service, 'countNumbers']),
+        ];
+    }
+}
+
+
+
+────────────────────────────────────────────
 📂 src/DataFixtures
 └── 📄 AppFixtures.php
 ────────────────────────────────────────────
@@ -117,24 +212,34 @@ class Ex01Bundle extends Bundle
 
 namespace App\Ex02Bundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class Ex02Controller extends AbstractController
 {
 
-    
+
 
     #[Route(path: '/{_locale}/ex02/{count}', name: 'ex02', requirements: ['_locale' => 'en|fr', 'count' => '\d'], defaults: ['count' => 0])]
     public function translationsAction($_locale, $count=0): Response
     {
-        $number = $this->getParameter('d07.number');
+        try
+        {
+            $number = $this->getParameter('d07.number');
 
-        return $this->render('ex02.html.twig', [
-            'number' => $number,
-            'count' => $count,
-        ]);
+            return $this->render('ex02/ex02.html.twig', [
+                'number' => $number,
+                'count' => $count,
+            ]);
+        }
+        catch (Exception $e)
+        {
+            $message = "Erreur lors du chargement de la page : ";
+            $this->addFlash('error', $message . $e->getMessage());
+            return $this->redirectToRoute('ex01_action');
+        }
     }
 }
 
@@ -187,6 +292,30 @@ class Kernel extends BaseKernel
 └── 📄 .gitignore
 ────────────────────────────────────────────
 
+
+
+────────────────────────────────────────────
+📂 src/Service
+└── 📄 Ex03Service.php
+────────────────────────────────────────────
+<?php
+
+namespace App\Service;
+
+class Ex03Service
+{
+    public function uppercaseWords(string $txt): string
+    {
+        // Met la première lettre de chaque mot en majuscule
+        return ucwords(strtolower($txt));
+    }
+
+    public function countNumbers(string $txt): int
+    {
+        // Compte les chiffres contenus dans le texte
+        return preg_match_all('/\d/', $txt);
+    }
+}
 
 
 ────────────────────────────────────────────
@@ -253,6 +382,10 @@ Ex02Bundle:
     resource: '../src/Ex02Bundle/Controller'
     type: attribute
 
+D07Bundle:
+    resource: '../src/D07Bundle/Controller'
+    type: attribute
+
 
 
 ────────────────────────────────────────────
@@ -289,4 +422,27 @@ when@test:
 d07:
   number: 42
   enable: true
+
+
+────────────────────────────────────────────
+📂 config
+└── 📄 services.yaml
+────────────────────────────────────────────
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+
+    App\Service\Ex03Service: ~
+
+    App\D07Bundle\Twig\Ex03Extension:
+        arguments:
+            - '@App\Service\Ex03Service'
+        tags: ['twig.extension']
+
 

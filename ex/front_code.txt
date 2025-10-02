@@ -51,3 +51,18 @@
     <p>{{ 'ex02.count.number'|trans({'%count%': count}) }}</p>
 {% endif %}
 
+
+────────────────────────────────────────────
+📂 templates/ex03
+└── 📄 ex03.html.twig
+────────────────────────────────────────────
+<h1>Demo Ex03</h1>
+
+<p>Normal: {{ text }}</p>
+<p>UppercaseWords : {{ text|uppercaseWords }}</p>
+<p>CountNumbers : {{ countNumbers(text) }}</p>
+
+<p>Avec une variable (autre exemple):</p>
+<p>"{{ example|uppercaseWords }}" ({{ countNumbers(example) }} chiffres)</p>
+
+
